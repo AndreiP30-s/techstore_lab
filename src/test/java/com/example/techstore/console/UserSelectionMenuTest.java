@@ -27,7 +27,7 @@ class UserSelectionMenuTest {
     // Покупатель видит только чтение каталога с последовательными номерами.
     @Test void customerMenu() {
         String output = run("3\n1\n0\n0\n");
-        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Анна (CUSTOMER)"));
+        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Покупатель (CUSTOMER)"));
         assertTrue(output.contains("2. Поиск"));
         assertTrue(output.contains("3. Фильтр"));
         assertTrue(output.contains("4. Бренды"));
@@ -38,18 +38,18 @@ class UserSelectionMenuTest {
     // Можно сменить администратора на менеджера, затем на покупателя.
     @Test void switchesRoles() {
         String output = run("1\n2\n4\n2\n1\n0\n3\n3\n0\n");
-        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Андрей (ADMIN)"));
-        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Иван (MANAGER)"));
-        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Анна (CUSTOMER)"));
+        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Администратор (ADMIN)"));
+        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Менеджер (MANAGER)"));
+        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Покупатель (CUSTOMER)"));
         assertTrue(output.contains("Добавить товар"));
-        assertTrue(output.contains("Андрей | admin@example.org | ADMIN"));
+        assertTrue(output.contains("Администратор | admin@example.org | ADMIN"));
     }
     // Ошибку номера и отмену можно исправить следующим вводом.
     @Test void retriesSelection() {
         String output = run("99\n/cancel\n3\n0\n");
         assertTrue(output.contains("Введите целое число"));
         assertTrue(output.contains("Выбор отменён."));
-        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Анна"));
+        assertTrue(output.contains("ГЛАВНОЕ МЕНЮ — Покупатель"));
     }
     // Ноль завершает программу до выбора пользователя.
     @Test void exitsBeforeSelection() {
