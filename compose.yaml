@@ -1,0 +1,25 @@
+name: techstore-lab2-docker
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: techstore
+      POSTGRES_USER: techstore
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-techstore_local}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    ports:
+      - "127.0.0.1:${DB_PORT:-5434}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./db/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/02-java-support.sql:/docker-entrypoint-initdb.d/02-java-support.sql:ro
+      - ./db/03-reference-data.sql:/docker-entrypoint-initdb.d/03-reference-data.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+volumes:
+  postgres_data:

@@ -1,6 +1,8 @@
 target/
 .idea/
+.run/
 *.iml
-.DS_Store
-.m2/
+.env
+.local/
 *.log
+.DS_Store

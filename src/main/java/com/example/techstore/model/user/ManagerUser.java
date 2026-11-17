@@ -1,6 +1,21 @@
 package com.example.techstore.model.user;
-import java.util.UUID;
-public final class ManagerUser extends User {
-    public ManagerUser(UUID id, String name, String email) { super(id, name, email); }
-    @Override public UserRole getRole() { return UserRole.MANAGER; }
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@Entity
+@DiscriminatorValue("MANAGER")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class ManagerUser extends User {
+    public ManagerUser(String email, String name, String passwordHash) {
+        super(email, name, passwordHash);
+    }
+
+    @Override
+    public UserRole getRole() {
+        return UserRole.MANAGER;
+    }
 }

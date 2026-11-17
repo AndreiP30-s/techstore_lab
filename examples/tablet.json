@@ -1,0 +1,23 @@
+{
+  "name": "Demo Tablet",
+  "brand": "DemoBrand",
+  "category": "TABLET",
+  "price": 40000,
+  "available": true,
+  "specifications": {
+    "processor": "Demo CPU",
+    "ramGb": "8",
+    "storageGb": "256",
+    "screenDiagonalInches": "11",
+    "frontCameraMp": "12",
+    "batteryCapacityMah": "8000",
+    "cellular": "true"
+  },
+  "rearCameras": [
+    {
+      "type": "WIDE",
+      "resolutionMp": 13,
+      "quantity": 1
+    }
+  ]
+}

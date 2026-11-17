@@ -1,29 +1,63 @@
 package com.example.techstore.model.product;
-import com.example.techstore.model.Identifiable;
-import com.example.techstore.model.Validation;
+
+import com.example.techstore.model.catalog.Brand;
+import com.example.techstore.model.catalog.Category;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
-public abstract class Product implements Identifiable<Long> {
-    private final long article;
-    private final String name;
-    private final String brand;
-    private volatile BigDecimal price;
-    protected Product(long article, String name, String brand, BigDecimal price) {
-        this.article = Validation.article(article);
-        this.name = Validation.text(name, "name");
-        this.brand = Validation.text(brand, "brand");
-        this.price = Validation.price(price);
-    }
-    /** Ключ репозитория — артикул товара. */
-    @Override public Long getId() { return article; }
-    public long getArticle() { return article; }
-    public String getName() { return name; }
-    public String getBrand() { return brand; }
-    public BigDecimal getPrice() { return price; }
-    public void changePrice(BigDecimal price) { this.price = Validation.price(price); }
-    public abstract ProductCategory getCategory();
-    public abstract String getSpecifications();
-    @Override public final boolean equals(Object other) {
-        return this == other || other instanceof Product product && article == product.article;
-    }
-    @Override public final int hashCode() { return Long.hashCode(article); }
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "product")
+@Getter
+@Setter
+@NoArgsConstructor
+public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "article_generator")
+    @SequenceGenerator(
+            name = "article_generator",
+            sequenceName = "product_article_seq",
+            allocationSize = 1)
+    private Integer article;
+
+    @Column(nullable = false, length = 200)
+    private String name;
+
+    @Column(nullable = false, precision = 9, scale = 2)
+    private BigDecimal price;
+
+    @Column(nullable = false)
+    private boolean available = true;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "brand_name")
+    private Brand brand;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "category_code")
+    private Category category;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductSpecification> specifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RearCamera> rearCameras = new ArrayList<>();
 }

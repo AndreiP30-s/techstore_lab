@@ -1,0 +1,28 @@
+{
+  "name": "Demo Phone",
+  "brand": "DemoBrand",
+  "category": "SMARTPHONE",
+  "price": 30000,
+  "available": true,
+  "specifications": {
+    "processor": "Demo CPU",
+    "ramGb": "8",
+    "storageGb": "256",
+    "screenDiagonalInches": "6.5",
+    "frontCameraMp": "12",
+    "batteryCapacityMah": "5000",
+    "supports5g": "true"
+  },
+  "rearCameras": [
+    {
+      "type": "WIDE",
+      "resolutionMp": 50,
+      "quantity": 2
+    },
+    {
+      "type": "ULTRA_WIDE",
+      "resolutionMp": 12,
+      "quantity": 1
+    }
+  ]
+}

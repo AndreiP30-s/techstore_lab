@@ -1,54 +1,16 @@
 package com.example.techstore.service;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.stereotype.Service;
-import com.example.techstore.model.product.Product;
 
-@Service
-public class DiscountService {
-    private final CatalogService catalog;
-    private final ParallelPriceService calculator;
-    private final Map<Product, BigDecimal> previousPrices = new LinkedHashMap<>();
+/** Применение и отмена скидки с сохранением состояния в БД. */
+public interface DiscountService {
+    record Status(boolean active) {}
 
-    public DiscountService(CatalogService catalog, ParallelPriceService calculator) {
-        this.catalog = catalog;
-        this.calculator = calculator;
-    }
+    record Result(int affected) {}
 
-    public synchronized boolean isActive() { return !previousPrices.isEmpty(); }
+    Status status();
 
-    public synchronized int apply(BigDecimal percent, int threads) {
-        if (isActive()) { throw new IllegalArgumentException("Сначала отмените действующую скидку."); }
-        if (percent == null || percent.signum() <= 0 || percent.compareTo(new BigDecimal("100")) > 0) {
-            throw new IllegalArgumentException("Скидка должна быть больше 0 и не больше 100%.");
-        }
-        List<Product> products = catalog.findAll();
-        if (products.isEmpty()) { throw new IllegalArgumentException("Каталог пуст."); }
-        // Сначала рассчитываем все цены, затем применяем скидку.
-        List<PriceQuote> quotes = calculator.calculate(products, percent, threads);
-        for (int i = 0; i < products.size(); i++) {
-            Product product = products.get(i);
-            previousPrices.put(product, quotes.get(i).originalPrice());
-            product.changePrice(quotes.get(i).discountedPrice());
-        }
-        return products.size();
-    }
+    Result apply(BigDecimal percent, int threads);
 
-    public synchronized int cancel() {
-        if (!isActive()) { throw new IllegalArgumentException("Нет действующей скидки."); }
-        int restored = 0;
-        for (Map.Entry<Product, BigDecimal> entry : previousPrices.entrySet()) {
-            Product product = entry.getKey();
-            // Проверяем сам объект: артикул мог быть занят другим товаром.
-            if (catalog.findByArticle(product.getArticle()).orElse(null) == product) {
-                product.changePrice(entry.getValue());
-                restored++;
-            }
-        }
-        previousPrices.clear();
-        return restored;
-    }
+    Result cancel();
 }

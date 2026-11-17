@@ -1,0 +1,15 @@
+{
+  "name": "Demo Headphones",
+  "brand": "DemoBrand",
+  "category": "HEADPHONES",
+  "price": 5000,
+  "available": true,
+  "specifications": {
+    "headphoneType": "OVER_EAR",
+    "wireless": "true",
+    "noiseCancelling": "true",
+    "minFrequencyHz": "20",
+    "maxFrequencyHz": "20000"
+  },
+  "rearCameras": []
+}
