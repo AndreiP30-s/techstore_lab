@@ -7,6 +7,12 @@ public enum CameraType {
     MACRO("макро");
 
     private final String displayName;
-    CameraType(String displayName) { this.displayName = displayName; }
-    public String getDisplayName() { return displayName; }
+
+    CameraType(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
 }

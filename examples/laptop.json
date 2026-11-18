@@ -1,0 +1,16 @@
+{
+  "name": "Demo Laptop",
+  "brand": "DemoBrand",
+  "category": "LAPTOP",
+  "price": 70000,
+  "available": true,
+  "specifications": {
+    "processor": "Demo CPU",
+    "ramGb": "8",
+    "storageGb": "256",
+    "screenDiagonalInches": "15.6",
+    "frontCameraMp": "12",
+    "storageType": "SSD"
+  },
+  "rearCameras": []
+}

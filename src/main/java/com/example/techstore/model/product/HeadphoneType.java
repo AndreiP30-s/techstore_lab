@@ -7,6 +7,11 @@ public enum HeadphoneType {
 
     private final String displayName;
 
-    HeadphoneType(String displayName) { this.displayName = displayName; }
-    public String getDisplayName() { return displayName; }
+    HeadphoneType(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
 }

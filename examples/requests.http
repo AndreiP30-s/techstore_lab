@@ -1,0 +1,108 @@
+# Запросы для HTTP-клиента IntelliJ IDEA. Приложение и база должны быть запущены.
+@baseUrl = http://localhost:8081
+@article = 100001
+
+### Категории
+GET {{baseUrl}}/api/categories
+
+### Бренды
+GET {{baseUrl}}/api/brands
+
+### Характеристики
+GET {{baseUrl}}/api/specifications
+
+### Создание смартфона (записать артикул из ответа в @article)
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+< ./smartphone.json
+
+### Получение товара
+GET {{baseUrl}}/api/products/{{article}}
+
+### Поиск с несколькими фильтрами
+GET {{baseUrl}}/api/products?name=Demo&brand=DemoBrand&category=SMARTPHONE&minPrice=10000&maxPrice=50000&available=true&page=0&size=10
+
+### Полное обновление товара, характеристик и камер
+PUT {{baseUrl}}/api/products/{{article}}
+Content-Type: application/json
+
+< ./smartphone.json
+
+### Создание планшета
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+< ./tablet.json
+
+### Создание ноутбука
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+< ./laptop.json
+
+### Создание наушников
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+< ./headphones.json
+
+### Создание пользователя
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+< ./user.json
+
+### Получение пользователя без пароля и хеша
+GET {{baseUrl}}/api/users/customer@example.com
+
+### Поиск пользователей по роли
+GET {{baseUrl}}/api/users?role=CUSTOMER
+
+### Изменение пользователя; email остаётся прежним
+PUT {{baseUrl}}/api/users/customer@example.com
+Content-Type: application/json
+
+{"name":"Новое имя","role":"MANAGER"}
+
+### Создание бренда
+POST {{baseUrl}}/api/brands
+Content-Type: application/json
+
+{"name":"NewBrand"}
+
+### Переименование неиспользуемого бренда
+PUT {{baseUrl}}/api/brands/NewBrand
+Content-Type: application/json
+
+{"name":"RenamedBrand"}
+
+### Удаление неиспользуемого бренда
+DELETE {{baseUrl}}/api/brands/RenamedBrand
+
+### Разрешённые характеристики категории
+GET {{baseUrl}}/api/categories/SMARTPHONE/specifications
+
+### Применение скидки ко всем товарам. До отмены изменение каталога заблокировано.
+POST {{baseUrl}}/api/discount
+Content-Type: application/json
+
+{"percent":10,"threads":3}
+
+### Состояние скидки сохраняется после перезапуска
+GET {{baseUrl}}/api/discount
+
+### Восстановление исходных цен
+DELETE {{baseUrl}}/api/discount
+
+### Некорректный диапазон цен — 400
+GET {{baseUrl}}/api/products?minPrice=100&maxPrice=10
+
+### Несуществующий товар — 404
+GET {{baseUrl}}/api/products/2147483647
+
+### Удаление товара, его характеристик и камер
+DELETE {{baseUrl}}/api/products/{{article}}
+
+### Удаление пользователя
+DELETE {{baseUrl}}/api/users/customer@example.com
