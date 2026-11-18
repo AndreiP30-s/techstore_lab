@@ -8,6 +8,4 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface ProductRepository
         extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
     boolean existsByBrandName(String name);
-
-    boolean existsBySpecificationsIdSpecificationName(String name);
 }

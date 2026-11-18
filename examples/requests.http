@@ -80,15 +80,6 @@ Content-Type: application/json
 ### Удаление неиспользуемого бренда
 DELETE {{baseUrl}}/api/brands/RenamedBrand
 
-### Создание дополнительной характеристики
-POST {{baseUrl}}/api/specifications
-Content-Type: application/json
-
-{"name":"color","valueType":"TEXT","unit":null}
-
-### Назначение характеристики color смартфонам
-PUT {{baseUrl}}/api/categories/SMARTPHONE/specifications/color
-
 ### Разрешённые характеристики категории
 GET {{baseUrl}}/api/categories/SMARTPHONE/specifications
 

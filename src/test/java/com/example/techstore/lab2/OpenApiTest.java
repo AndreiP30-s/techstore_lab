@@ -21,6 +21,11 @@ class OpenApiTest extends DatabaseFreeTest {
                 .andExpect(jsonPath("$.paths['/api/users'].post").exists())
                 .andExpect(jsonPath("$.paths['/api/discount'].delete").exists())
                 .andExpect(jsonPath("$.paths['/api/categories'].get").exists())
+                .andExpect(jsonPath("$.paths['/api/specifications/{name}']").doesNotExist())
+                .andExpect(jsonPath("$.paths['/api/specifications'].get").exists())
+                .andExpect(jsonPath("$.paths['/api/specifications'].post").doesNotExist())
+                .andExpect(jsonPath("$.paths['/api/categories/{code}/specifications'].get").exists())
+                .andExpect(jsonPath("$.paths['/api/categories/{code}/specifications/{name}']").doesNotExist())
                 .andExpect(jsonPath("$.components.schemas.ProductRequest.example").exists())
                 .andExpect(jsonPath("$.components.schemas.UserResponse.properties.email").exists())
                 .andExpect(

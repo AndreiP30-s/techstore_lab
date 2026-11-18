@@ -38,7 +38,7 @@ docker compose up -d --wait
 ## Настройки базы
 
 По умолчанию: адрес `localhost:5434`, база и пользователь `techstore`,
-пароль локальной базы `techstore_local`. Приложение использует порт `8081`.
+пароль локальной базы `techstore_local`. Приложение использует порт `8080`.
 Для запуска с настройками по умолчанию `.env` не нужен.
 Docker Compose читает из `.env` параметры `DB_PORT` и `DB_PASSWORD`
 (пример — `.env.example`). Maven этот файл не читает: изменённые параметры
@@ -85,9 +85,8 @@ ER-диаграмма из pgAdmin:
 - `/api/users/form` — POST формы, `/api/users/{email}/form` — PUT формы;
 - `/api/brands` и `/api/brands/{name}` — CRUD брендов;
 - `/api/categories` — GET категорий;
-- `/api/specifications` и `/api/specifications/{name}` — CRUD характеристик;
+- `/api/specifications` — GET списка характеристик;
 - `/api/categories/{code}/specifications` — GET характеристик категории;
-- `/api/categories/{code}/specifications/{name}` — PUT или DELETE связи;
 - `/api/discount` — GET состояния, POST применения, DELETE отмены скидки.
 
 Фильтры товаров: `name`, `brand`, `category`, `minPrice`, `maxPrice`, `available`.

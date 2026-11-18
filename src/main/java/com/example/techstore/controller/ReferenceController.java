@@ -77,50 +77,9 @@ public class ReferenceController {
         return service.specifications();
     }
 
-    @GetMapping("/specifications/{name}")
-    @Operation(summary = "Найти характеристику")
-    public CharacteristicDto specification(@PathVariable String name) {
-        return service.specification(name);
-    }
-
-    @PostMapping("/specifications")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Создать характеристику")
-    public CharacteristicDto createSpecification(@Valid @RequestBody CharacteristicDto request) {
-        return service.createSpecification(request);
-    }
-
-    @PutMapping("/specifications/{name}")
-    @Operation(summary = "Обновить характеристику")
-    public CharacteristicDto updateSpecification(
-            @PathVariable String name, @Valid @RequestBody CharacteristicDto request) {
-        return service.updateSpecification(name, request);
-    }
-
-    @DeleteMapping("/specifications/{name}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Удалить характеристику")
-    public void deleteSpecification(@PathVariable String name) {
-        service.deleteSpecification(name);
-    }
-
     @GetMapping("/categories/{code}/specifications")
     @Operation(summary = "Характеристики категории")
     public List<String> categorySpecifications(@PathVariable String code) {
         return service.categorySpecifications(code);
-    }
-
-    @PutMapping("/categories/{code}/specifications/{name}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Разрешить характеристику для категории")
-    public void link(@PathVariable String code, @PathVariable String name) {
-        service.link(code, name);
-    }
-
-    @DeleteMapping("/categories/{code}/specifications/{name}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Убрать характеристику из категории")
-    public void unlink(@PathVariable String code, @PathVariable String name) {
-        service.unlink(code, name);
     }
 }

@@ -10,6 +10,4 @@ import java.util.List;
 public interface CategoryCharacteristicRepository
         extends JpaRepository<CategoryCharacteristic, CategoryCharacteristicId> {
     List<CategoryCharacteristic> findByIdCategoryCode(String code);
-
-    boolean existsByIdSpecificationName(String name);
 }

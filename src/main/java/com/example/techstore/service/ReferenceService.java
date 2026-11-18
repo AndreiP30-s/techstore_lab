@@ -22,17 +22,5 @@ public interface ReferenceService {
 
     List<CharacteristicDto> specifications();
 
-    CharacteristicDto specification(String name);
-
-    CharacteristicDto createSpecification(CharacteristicDto request);
-
-    CharacteristicDto updateSpecification(String name, CharacteristicDto request);
-
-    void deleteSpecification(String name);
-
     List<String> categorySpecifications(String code);
-
-    void link(String code, String name);
-
-    void unlink(String code, String name);
 }

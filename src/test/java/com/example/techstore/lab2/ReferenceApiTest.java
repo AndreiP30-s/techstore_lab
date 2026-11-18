@@ -43,47 +43,20 @@ class ReferenceApiTest extends DatabaseFreeTest {
     }
 
     @Test
-    void managesSpecificationAndCategoryLink() throws Exception {
+    void listsSpecificationsAndCategorySpecifications() throws Exception {
         Characteristic specification = new Characteristic();
         specification.setName("color");
         specification.setValueType("TEXT");
-        when(specifications.findById("color")).thenReturn(Optional.of(specification));
         when(categories.existsById("SMARTPHONE")).thenReturn(true);
-        mvc.perform(
-                        post("/api/specifications")
-                                .contentType("application/json")
-                                .content(
-                                        "{\"name\":\"color\",\"valueType\":\"TEXT\",\"unit\":null}"))
-                .andExpect(status().isCreated());
-        mvc.perform(put("/api/categories/SMARTPHONE/specifications/color"))
-                .andExpect(status().isNoContent());
-        verify(links).saveAndFlush(any(CategoryCharacteristic.class));
         when(links.findByIdCategoryCode("SMARTPHONE"))
-                .thenReturn(List.of(new CategoryCharacteristic("SMARTPHONE", "color")));
+                .thenReturn(List.of(new CategoryCharacteristic("SMARTPHONE", "ramGb")));
         mvc.perform(get("/api/categories/SMARTPHONE/specifications"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0]").value("color"));
-        when(links.existsByIdSpecificationName("color")).thenReturn(true);
-        mvc.perform(delete("/api/specifications/color")).andExpect(status().isConflict());
-    }
-
-    @Test
-    void rejectsInvalidSpecificationTypeAndChangingUsedType() throws Exception {
-        mvc.perform(
-                        post("/api/specifications")
-                                .contentType("application/json")
-                                .content("{\"name\":\"color\",\"valueType\":\"WRONG\"}"))
-                .andExpect(status().isBadRequest());
-        Characteristic specification = new Characteristic();
-        specification.setName("ramGb");
-        specification.setValueType("INTEGER");
-        when(specifications.findById("ramGb")).thenReturn(Optional.of(specification));
-        when(links.existsByIdSpecificationName("ramGb")).thenReturn(true);
-        mvc.perform(
-                        put("/api/specifications/ramGb")
-                                .contentType("application/json")
-                                .content("{\"name\":\"ramGb\",\"valueType\":\"TEXT\"}"))
-                .andExpect(status().isConflict());
+                .andExpect(jsonPath("$[0]").value("ramGb"));
+        when(specifications.findAll()).thenReturn(List.of(specification));
+        mvc.perform(get("/api/specifications"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("color"));
     }
 
     @Test
