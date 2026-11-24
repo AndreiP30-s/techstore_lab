@@ -1,4 +1,4 @@
-name: techstore-lab2-docker
+name: techstore_lab
 services:
   db:
     image: postgres:18
