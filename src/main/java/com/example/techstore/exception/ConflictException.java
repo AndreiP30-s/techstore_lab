@@ -1,7 +1,7 @@
 package com.example.techstore.exception;
 
-public class ConflictException extends RuntimeException {
-    public ConflictException(String message) {
-        super(message);
+public class ConflictException extends ApiException {
+    public ConflictException(ErrorCode code, String message) {
+        super(code, message);
     }
 }

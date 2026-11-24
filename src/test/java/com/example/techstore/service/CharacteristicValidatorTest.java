@@ -3,6 +3,7 @@ package com.example.techstore.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.example.techstore.exception.InvalidCharacteristicException;
 import com.example.techstore.dto.ProductRequest;
 import com.example.techstore.model.product.ProductCategory;
 import com.example.techstore.repository.*;
@@ -30,8 +31,8 @@ class CharacteristicValidatorTest {
                         true,
                         values,
                         List.of());
-        IllegalArgumentException error =
-                assertThrows(IllegalArgumentException.class, () -> validator.validate(request));
+        InvalidCharacteristicException error =
+                assertThrows(InvalidCharacteristicException.class, () -> validator.validate(request));
         assertTrue(error.getMessage().contains("color"));
         verifyNoInteractions(links, definitions);
     }

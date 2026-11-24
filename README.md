@@ -14,7 +14,7 @@ make run
 ```
 
 PostgreSQL запускается в Docker, приложение — через Maven на компьютере.
-После запуска API доступно в [Swagger](http://localhost:8081/swagger-ui.html).
+После запуска API доступно в [Swagger](http://localhost:8080/swagger-ui.html).
 Для остановки приложения — Ctrl+C, затем `make down` для остановки базы.
 Данные при этом сохраняются.
 
@@ -119,3 +119,37 @@ HTTP-клиентов и входа в систему нет.
 
 `make test` запускает тесты JUnit, Mockito и MockMvc с `@SpringBootTest` без подключения к БД.
 GitHub Actions выполняет Maven verify на Java 17.
+
+## Формат ошибок
+
+REST API возвращает HTTP-статус и JSON с кодом `error`, сообщением `message`,
+подсказкой `hint`, списком ошибок полей `details` и временем ошибки `timestamp` в UTC.
+Клиент может использовать стабильный код `error` для выбора действия.
+Например, `GET /api/products?minPrice=100&maxPrice=10` возвращает HTTP 400.
+
+```json
+{
+  "status": 400,
+  "error": "INVALID_PRICE_RANGE",
+  "message": "Некорректный диапазон цен: minPrice=100, maxPrice=10",
+  "hint": "Укажите неотрицательные цены и minPrice не больше maxPrice, например minPrice=10&maxPrice=100.",
+  "details": [],
+  "timestamp": "2026-11-18T12:00:00Z"
+}
+```
+
+| HTTP | Коды ошибок |
+| --- | --- |
+| 400 | `INVALID_PRICE_RANGE`, `INVALID_PAGINATION`, `EMPTY_UPDATE`, `INVALID_EMAIL`, `PASSWORD_TOO_LONG` |
+| 400 | `INVALID_DISCOUNT_PERCENT`, `INVALID_DISCOUNT_RESULT`, `INVALID_THREAD_COUNT` |
+| 400 | `UNKNOWN_CATEGORY`, `INVALID_CAMERA_CONFIGURATION`, `MISSING_CHARACTERISTIC`, `INVALID_CHARACTERISTIC_VALUE`, `CHARACTERISTIC_NOT_ALLOWED` |
+| 400 | `INVALID_PARAMETER_TYPE`, `MISSING_PARAMETER`, `MALFORMED_REQUEST`, `VALIDATION_FAILED` |
+| 404 | `PRODUCT_NOT_FOUND`, `USER_NOT_FOUND`, `BRAND_NOT_FOUND`, `CATEGORY_NOT_FOUND`, `CHARACTERISTIC_NOT_FOUND` |
+| 405 | `METHOD_NOT_ALLOWED`. Допустимые методы указаны в `Allow`. |
+| 409 | `DUPLICATE_EMAIL`, `DUPLICATE_BRAND`, `BRAND_IN_USE`, `DATA_CONFLICT` |
+| 409 | `DISCOUNT_ALREADY_ACTIVE`, `NO_ACTIVE_DISCOUNT`, `CATALOG_LOCKED_BY_DISCOUNT`, `EMPTY_CATALOG`, `DISCOUNT_PRODUCT_NOT_FOUND` |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` |
+| 500 | `PRICE_CALCULATION_FAILED`, `DISCOUNT_CONFIGURATION_ERROR` |
+| 503 | `DATABASE_UNAVAILABLE` |
+
+Технические причины обработанных ошибок 500 и 503 записываются в журнал сервера.

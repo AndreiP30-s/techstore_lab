@@ -1,5 +1,8 @@
 package com.example.techstore.service;
 
+import com.example.techstore.exception.ErrorCode;
+import com.example.techstore.exception.PriceCalculationException;
+import com.example.techstore.exception.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,13 +29,17 @@ public class ParallelPriceService {
             Collection<PriceSnapshot> products, BigDecimal discountPercent, int threadCount) {
         Objects.requireNonNull(discountPercent, "discountPercent");
         if (discountPercent.signum() < 0 || discountPercent.compareTo(new BigDecimal("100")) > 0) {
-            throw new IllegalArgumentException("Discount must be between 0 and 100");
+            throw new ValidationException(
+                    ErrorCode.INVALID_DISCOUNT_PERCENT,
+                    "Недопустимый процент скидки: " + discountPercent);
         }
         if (threadCount < 1 || threadCount > 32) {
-            throw new IllegalArgumentException("Thread count must be 1..32");
+            throw new ValidationException(
+                    ErrorCode.INVALID_THREAD_COUNT,
+                    "Недопустимое число потоков: " + threadCount);
         }
         if (Thread.currentThread().isInterrupted()) {
-            throw new IllegalStateException("Price calculation interrupted");
+            throw new PriceCalculationException("Расчёт цен прерван", null);
         }
         List<PriceSnapshot> snapshot = List.copyOf(products);
         if (snapshot.isEmpty()) {
@@ -72,9 +79,9 @@ public class ParallelPriceService {
             return List.copyOf(result);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("Price calculation interrupted", exception);
+            throw new PriceCalculationException("Расчёт цен прерван", exception);
         } catch (ExecutionException exception) {
-            throw new IllegalStateException("Price calculation failed", exception.getCause());
+            throw new PriceCalculationException("Ошибка в потоке расчёта цен", exception.getCause());
         } finally {
             executor.shutdownNow();
             try {
