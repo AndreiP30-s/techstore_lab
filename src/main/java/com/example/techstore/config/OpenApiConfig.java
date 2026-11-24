@@ -1,7 +1,12 @@
 package com.example.techstore.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -11,13 +16,15 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@SecurityScheme(name = "basicAuth", type = SecuritySchemeType.HTTP, scheme = "basic")
 @OpenAPIDefinition(
+        security = @SecurityRequirement(name = "basicAuth"),
         info =
                 @Info(
                         title = "TechStore REST API",
                         version = "1.0.0",
                         description =
-                                "**Добавить товар:** откройте «1. Товары», выберите «Добавить"
+                                "Войдите кнопкой Authorize, указав email и пароль. **Добавить товар:** откройте «1. Товары», выберите «Добавить"
                                     + " смартфон» или другую категорию, нажмите Try it out,"
                                     + " заполните название и цену, затем Execute. JSON вводить не"
                                     + " нужно. Проверьте значения характеристик перед сохранением."
@@ -30,6 +37,7 @@ public class OpenApiConfig {
     public OpenApiCustomizer easyOperationOrder() {
         return api -> {
             Paths original = api.getPaths();
+            if (original == null) return;
             Paths ordered = new Paths();
             List<String> first =
                     List.of(
@@ -50,15 +58,18 @@ public class OpenApiConfig {
                     (path, item) -> {
                         if (!ordered.containsKey(path)) ordered.addPathItem(path, item);
                     });
-            advanced(ordered.get("/api/products").getPost());
-            advanced(ordered.get("/api/products/{article}").getPut());
-            advanced(ordered.get("/api/users").getPost());
-            advanced(ordered.get("/api/users/{email}").getPut());
+            advanced(ordered, "/api/products", PathItem.HttpMethod.POST);
+            advanced(ordered, "/api/products/{article}", PathItem.HttpMethod.PUT);
+            advanced(ordered, "/api/users", PathItem.HttpMethod.POST);
+            advanced(ordered, "/api/users/{email}", PathItem.HttpMethod.PUT);
             api.setPaths(ordered);
         };
     }
 
-    private static void advanced(io.swagger.v3.oas.models.Operation operation) {
+    private static void advanced(Paths paths, String path, PathItem.HttpMethod method) {
+        PathItem item = paths.get(path);
+        if (item == null) return;
+        Operation operation = item.readOperationsMap().get(method);
         if (operation != null) operation.setTags(List.of("5. Расширенные JSON-запросы"));
     }
 }

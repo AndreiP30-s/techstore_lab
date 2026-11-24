@@ -5,6 +5,8 @@ import com.example.techstore.model.product.Product;
 import com.example.techstore.model.product.ProductCategory;
 import com.example.techstore.model.product.ProductSpecification;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
@@ -12,14 +14,16 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public record ProductResponse(
-        Integer article,
-        String name,
-        String brand,
-        ProductCategory category,
-        BigDecimal price,
-        boolean available,
-        Map<String, String> specifications,
-        List<ProductRequest.RearCameraRequest> rearCameras) {
+        @Schema(description = "Уникальный артикул товара", example = "100001") Integer article,
+        @Schema(description = "Название товара", example = "Смартфон A1") String name,
+        @Schema(description = "Название бренда", example = "DemoBrand") String brand,
+        @Schema(description = "Категория товара", example = "SMARTPHONE") ProductCategory category,
+        @Schema(description = "Цена в рублях", example = "24990.00") BigDecimal price,
+        @Schema(description = "Товар доступен для заказа") boolean available,
+        @Schema(description = "Характеристики товара в виде пар «название — значение»")
+                Map<String, String> specifications,
+        @Schema(description = "Группы задних камер, если они есть у товара")
+                List<ProductRequest.RearCameraRequest> rearCameras) {
     public static ProductResponse from(Product product) {
         Map<String, String> values = new TreeMap<>();
         for (ProductSpecification value : product.getSpecifications())

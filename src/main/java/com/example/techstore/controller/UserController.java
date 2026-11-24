@@ -8,6 +8,7 @@ import com.example.techstore.model.user.UserRole;
 import com.example.techstore.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -52,7 +53,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Добавить пользователя — заполнить поля")
     public ResponseEntity<Response> createForm(
-            @io.swagger.v3.oas.annotations.Parameter(hidden = true) @Valid @ModelAttribute
+            @Parameter(hidden = true) @Valid @ModelAttribute
                     UserCreateForm form) {
         return create(form.toRequest());
     }
@@ -68,21 +69,26 @@ public class UserController {
     @PutMapping(value = "/{email}/form", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @Operation(summary = "Изменить пользователя — заполнить поля")
     public Response updateForm(
-            @PathVariable String email,
-            @io.swagger.v3.oas.annotations.Parameter(hidden = true) @Valid @ModelAttribute
+            @Parameter(description = "Email существующего пользователя", example = "customer@example.com")
+                    @PathVariable String email,
+            @Parameter(hidden = true) @Valid @ModelAttribute
                     Update form) {
         return service.update(email, form);
     }
 
     @GetMapping
     @Operation(summary = "Список пользователей и фильтр по роли")
-    public List<Response> list(@RequestParam(required = false) UserRole role) {
+    public List<Response> list(
+            @Parameter(description = "Роль для фильтрации списка", example = "CUSTOMER")
+                    @RequestParam(required = false) UserRole role) {
         return service.list(role);
     }
 
     @GetMapping("/{email}")
     @Operation(summary = "Найти пользователя по email")
-    public Response get(@PathVariable String email) {
+    public Response get(
+            @Parameter(description = "Email существующего пользователя", example = "customer@example.com")
+                    @PathVariable String email) {
         return service.get(email);
     }
 
@@ -101,14 +107,19 @@ public class UserController {
 
     @PutMapping("/{email}")
     @Operation(summary = "Изменить имя и роль")
-    public Response update(@PathVariable String email, @Valid @RequestBody Update request) {
+    public Response update(
+            @Parameter(description = "Email существующего пользователя", example = "customer@example.com")
+                    @PathVariable String email,
+            @Valid @RequestBody Update request) {
         return service.update(email, request);
     }
 
     @DeleteMapping("/{email}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Удалить пользователя")
-    public void delete(@PathVariable String email) {
+    public void delete(
+            @Parameter(description = "Email существующего пользователя", example = "customer@example.com")
+                    @PathVariable String email) {
         service.delete(email);
     }
 }

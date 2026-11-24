@@ -1,6 +1,8 @@
 package com.example.techstore.exception;
 
 public enum ErrorCode {
+    AUTHENTICATION_REQUIRED("Укажите email и пароль через HTTP Basic."),
+    ACCESS_DENIED("Войдите с учётной записью, у которой есть права на эту операцию."),
     PRODUCT_NOT_FOUND("Проверьте артикул по каталогу."),
     USER_NOT_FOUND("Проверьте email пользователя."),
     BRAND_NOT_FOUND("Проверьте название по списку брендов."),

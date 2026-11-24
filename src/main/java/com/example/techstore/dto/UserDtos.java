@@ -19,17 +19,26 @@ public final class UserDtos {
 {"email":"customer@example.com","name":"Покупатель","password":"DemoPassword123","role":"CUSTOMER"}
 """)
     public record Create(
-            @NotBlank @Email @Size(max = 254) String email,
-            @NotBlank @Size(max = 100) String name,
-            @Schema(accessMode = Schema.AccessMode.WRITE_ONLY) @NotBlank @Size(min = 8, max = 72)
-                    String password,
-            @NotNull UserRole role) {}
+            @Schema(description = "Email для входа", example = "customer@example.com")
+                    @NotBlank @Email @Size(max = 254) String email,
+            @Schema(description = "Имя пользователя") @NotBlank @Size(max = 100) String name,
+            @Schema(description = "Пароль для входа, максимум 72 байта в UTF-8",
+                    accessMode = Schema.AccessMode.WRITE_ONLY)
+                    @NotBlank @Size(min = 8, max = 72) String password,
+            @Schema(description = "Назначаемая роль", example = "CUSTOMER")
+                    @NotNull UserRole role) {}
 
     @Schema(name = "UserUpdateRequest")
-    public record Update(@NotBlank @Size(max = 100) String name, @NotNull UserRole role) {}
+    public record Update(
+            @Schema(description = "Новое имя пользователя") @NotBlank @Size(max = 100) String name,
+            @Schema(description = "Новая роль пользователя", example = "MANAGER")
+                    @NotNull UserRole role) {}
 
     @Schema(name = "UserResponse")
-    public record Response(String email, String name, UserRole role) {
+    public record Response(
+            @Schema(description = "Email пользователя", example = "customer@example.com") String email,
+            @Schema(description = "Имя пользователя") String name,
+            @Schema(description = "Текущая роль", example = "CUSTOMER") UserRole role) {
         public static Response from(com.example.techstore.model.user.User user) {
             return new Response(user.getEmail(), user.getName(), user.getRole());
         }

@@ -1,5 +1,6 @@
 package com.example.techstore.lab2;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -9,14 +10,20 @@ import com.example.techstore.model.user.User;
 import com.example.techstore.model.user.UserRole;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Optional;
 
+@ExtendWith(OutputCaptureExtension.class)
+@WithMockUser(roles = "ADMIN")
 class UserApiTest extends DatabaseFreeTest {
     @Autowired MockMvc mvc;
     String json =
@@ -32,7 +39,7 @@ class UserApiTest extends DatabaseFreeTest {
     }
 
     @Test
-    void hashesPasswordAndDoesNotExposeIt() throws Exception {
+    void hashesPasswordAndDoesNotExposeIt(CapturedOutput output) throws Exception {
         mvc.perform(post("/api/users").contentType("application/json").content(json))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email").value("test@example.com"))
@@ -43,6 +50,8 @@ class UserApiTest extends DatabaseFreeTest {
         assertTrue(
                 new BCryptPasswordEncoder()
                         .matches("Password123", saved.getValue().getPasswordHash()));
+        assertThat(output).contains("Создан пользователь: email=test@example.com, роль=CUSTOMER")
+                .doesNotContain("Password123", saved.getValue().getPasswordHash());
     }
 
     @Test
@@ -53,7 +62,7 @@ class UserApiTest extends DatabaseFreeTest {
     }
 
     @Test
-    void readsListsUpdatesAndDeletes() throws Exception {
+    void readsListsUpdatesAndDeletes(CapturedOutput output) throws Exception {
         User entity = user();
         when(users.findById("test@example.com")).thenReturn(Optional.of(entity));
         when(users.findByRoleName("CUSTOMER")).thenReturn(List.of(entity));
@@ -71,6 +80,7 @@ class UserApiTest extends DatabaseFreeTest {
                 .andExpect(jsonPath("$.role").value("MANAGER"));
         mvc.perform(delete("/api/users/test@example.com")).andExpect(status().isNoContent());
         verify(users).delete(entity);
+        assertThat(output).contains("Изменена роль пользователя: email=test@example.com, прежняя=CUSTOMER, новая=MANAGER");
     }
 
     @Test

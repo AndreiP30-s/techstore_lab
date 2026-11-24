@@ -1,5 +1,6 @@
 package com.example.techstore.lab2;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,14 +24,18 @@ import com.example.techstore.model.product.Product;
 import com.example.techstore.service.ParallelPriceService;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -38,6 +43,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+@ExtendWith(OutputCaptureExtension.class)
+@WithMockUser(roles = "ADMIN")
 class ApiErrorTest extends DatabaseFreeTest {
     private static final String DISCOUNT = """
             {"percent":10,"threads":2}
@@ -58,9 +65,10 @@ class ApiErrorTest extends DatabaseFreeTest {
     }
 
     @Test
-    void identifiesMissingProduct() throws Exception {
+    void identifiesMissingProduct(CapturedOutput output) throws Exception {
         expectError(mvc.perform(get("/api/products/999")), 404, "PRODUCT_NOT_FOUND")
                 .andExpect(jsonPath("$.message", containsString("999")));
+        assertThat(output).contains("Ошибка запроса: код=PRODUCT_NOT_FOUND, статус=404");
     }
 
     @Test
@@ -111,7 +119,7 @@ class ApiErrorTest extends DatabaseFreeTest {
 
     @Test
     void preservesAllowHeader() throws Exception {
-        expectError(mvc.perform(put("/api/discount")), 405, "METHOD_NOT_ALLOWED")
+        expectError(mvc.perform(put("/api/products")), 405, "METHOD_NOT_ALLOWED")
                 .andExpect(header().string(HttpHeaders.ALLOW, containsString("GET")));
     }
 

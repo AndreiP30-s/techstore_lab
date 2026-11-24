@@ -11,6 +11,8 @@ import com.example.techstore.repository.UserRepository;
 import com.example.techstore.service.EmailNormalizer;
 import com.example.techstore.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
@@ -55,6 +58,7 @@ public class UserServiceImpl implements UserService {
                         request.name().strip(),
                         encoder.encode(request.password()));
         users.saveAndFlush(user);
+        OperationAudit.info(log, "Создан пользователь: email={}, роль={}", email, user.getRole());
         return UserDtos.Response.from(user);
     }
 
@@ -64,17 +68,26 @@ public class UserServiceImpl implements UserService {
         User user = require(email);
         user.setName(request.name().strip());
         users.flush();
-        if (user.getRole() != request.role()
-                && users.changeRole(user.getEmail(), request.role().name()) != 1)
-            throw new NotFoundException(ErrorCode.USER_NOT_FOUND, "Пользователь не найден");
+        UserRole previousRole = user.getRole();
+        if (previousRole != request.role()) {
+            if (users.changeRole(user.getEmail(), request.role().name()) != 1)
+                throw new NotFoundException(ErrorCode.USER_NOT_FOUND, "Пользователь не найден");
+            OperationAudit.info(log, "Изменена роль пользователя: email={}, прежняя={}, новая={}",
+                    user.getEmail(), previousRole, request.role());
+        } else {
+            OperationAudit.info(log, "Обновлён пользователь: email={}, роль={}",
+                    user.getEmail(), request.role());
+        }
         return new UserDtos.Response(user.getEmail(), user.getName(), request.role());
     }
 
     @Transactional
     @Override
     public void delete(String email) {
-        users.delete(require(email));
+        User user = require(email);
+        users.delete(user);
         users.flush();
+        OperationAudit.info(log, "Удалён пользователь: email={}", user.getEmail());
     }
 
     private User require(String email) {
