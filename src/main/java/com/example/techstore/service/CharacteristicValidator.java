@@ -1,6 +1,8 @@
 package com.example.techstore.service;
 
 import com.example.techstore.dto.ProductRequest;
+import com.example.techstore.exception.ErrorCode;
+import com.example.techstore.exception.InvalidCharacteristicException;
 import com.example.techstore.exception.NotFoundException;
 import com.example.techstore.model.catalog.CategoryCharacteristic;
 import com.example.techstore.model.catalog.Characteristic;
@@ -34,11 +36,15 @@ public class CharacteristicValidator {
 
     public void validate(ProductRequest request) {
         if (request.specifications() == null)
-            throw new IllegalArgumentException("Характеристики обязательны");
+            throw new InvalidCharacteristicException(
+                    ErrorCode.MISSING_CHARACTERISTIC,
+                    "Характеристики обязательны");
         for (Map.Entry<String, String> entry : request.specifications().entrySet()) {
             if (entry.getValue() == null || entry.getValue().isBlank())
-                throw new IllegalArgumentException(
-                        "Пустое значение характеристики: " + entry.getKey());
+                throw new InvalidCharacteristicException(
+                        ErrorCode.INVALID_CHARACTERISTIC_VALUE,
+                        "Пустое значение характеристики: " + entry.getKey(),
+                        "Передайте непустое значение для " + entry.getKey() + ".");
         }
         rules.validate(request);
         Set<String> allowed = new HashSet<>();
@@ -46,29 +52,47 @@ public class CharacteristicValidator {
             allowed.add(link.getId().getSpecificationName());
         for (Map.Entry<String, String> entry : request.specifications().entrySet()) {
             if (!allowed.contains(entry.getKey()))
-                throw new IllegalArgumentException(
+                throw new InvalidCharacteristicException(
+                        ErrorCode.CHARACTERISTIC_NOT_ALLOWED,
                         "Характеристика не разрешена для категории: " + entry.getKey());
             Characteristic specification =
                     specifications
                             .findById(entry.getKey())
-                            .orElseThrow(() -> new NotFoundException("Характеристика не найдена"));
+                            .orElseThrow(() -> new NotFoundException(ErrorCode.CHARACTERISTIC_NOT_FOUND, "Характеристика не найдена: " + entry.getKey()));
             String value = entry.getValue().strip();
-            try {
-                switch (specification.getValueType()) {
-                    case "INTEGER" -> Integer.parseInt(value);
-                    case "DECIMAL" -> new BigDecimal(value);
-                    case "BOOLEAN" -> {
-                        if (!value.equals("true") && !value.equals("false"))
-                            throw new IllegalArgumentException();
-                    }
-                    case "TEXT", "ENUM" -> {
-                        if (value.isBlank()) throw new IllegalArgumentException();
-                    }
-                    default -> throw new IllegalArgumentException();
-                }
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Неверный тип значения: " + entry.getKey());
+            String valueType = specification.getValueType();
+            if (!isValidValue(valueType, value)) {
+                String hint = switch (valueType) {
+                    case "INTEGER" -> "Укажите целое число, например 8.";
+                    case "DECIMAL" -> "Укажите число, например 6.5.";
+                    case "BOOLEAN" -> "Укажите true или false.";
+                    default -> ErrorCode.INVALID_CHARACTERISTIC_VALUE.getHint();
+                };
+                throw new InvalidCharacteristicException(
+                        ErrorCode.INVALID_CHARACTERISTIC_VALUE,
+                        "Неверный тип значения характеристики " + entry.getKey() + ": ожидается " + valueType,
+                        hint);
             }
+        }
+    }
+
+    private boolean isValidValue(String valueType, String value) {
+        try {
+            return switch (valueType) {
+                case "INTEGER" -> {
+                    Integer.parseInt(value);
+                    yield true;
+                }
+                case "DECIMAL" -> {
+                    new BigDecimal(value);
+                    yield true;
+                }
+                case "BOOLEAN" -> value.equals("true") || value.equals("false");
+                case "TEXT", "ENUM" -> !value.isBlank();
+                default -> false;
+            };
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }

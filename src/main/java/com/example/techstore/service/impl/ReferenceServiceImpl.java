@@ -4,6 +4,7 @@ import com.example.techstore.dto.ReferenceDtos.BrandDto;
 import com.example.techstore.dto.ReferenceDtos.CategoryDto;
 import com.example.techstore.dto.ReferenceDtos.CharacteristicDto;
 import com.example.techstore.exception.ConflictException;
+import com.example.techstore.exception.ErrorCode;
 import com.example.techstore.exception.NotFoundException;
 import com.example.techstore.model.catalog.Characteristic;
 import com.example.techstore.repository.BrandRepository;
@@ -49,14 +50,15 @@ public class ReferenceServiceImpl implements ReferenceService {
     public BrandDto brand(String name) {
         return brands.findById(name)
                 .map(brand -> new BrandDto(brand.getName()))
-                .orElseThrow(() -> new NotFoundException("Бренд не найден: " + name));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND, "Бренд не найден: " + name));
     }
 
     @Transactional
     @Override
     public BrandDto createBrand(BrandDto request) {
         String name = request.name().strip();
-        if (brands.existsById(name)) throw new ConflictException("Бренд уже существует");
+        if (brands.existsById(name))
+            throw new ConflictException(ErrorCode.DUPLICATE_BRAND, "Бренд уже существует");
         brands.saveAndFlush(new com.example.techstore.model.catalog.Brand(name));
         return new BrandDto(name);
     }
@@ -64,11 +66,14 @@ public class ReferenceServiceImpl implements ReferenceService {
     @Transactional
     @Override
     public BrandDto renameBrand(String old, BrandDto request) {
-        if (!brands.existsById(old)) throw new NotFoundException("Бренд не найден");
+        if (!brands.existsById(old))
+            throw new NotFoundException(ErrorCode.BRAND_NOT_FOUND, "Бренд не найден");
         String name = request.name().strip();
         if (old.equals(name)) return new BrandDto(name);
         if (products.existsByBrandName(old))
-            throw new ConflictException("Нельзя переименовать используемый бренд");
+            throw new ConflictException(
+                    ErrorCode.BRAND_IN_USE,
+                    "Нельзя переименовать используемый бренд");
         BrandDto result = createBrand(request);
         brands.deleteById(old);
         brands.flush();
@@ -78,9 +83,10 @@ public class ReferenceServiceImpl implements ReferenceService {
     @Transactional
     @Override
     public void deleteBrand(String name) {
-        if (!brands.existsById(name)) throw new NotFoundException("Бренд не найден");
+        if (!brands.existsById(name))
+            throw new NotFoundException(ErrorCode.BRAND_NOT_FOUND, "Бренд не найден");
         if (products.existsByBrandName(name))
-            throw new ConflictException("Бренд используется товарами");
+            throw new ConflictException(ErrorCode.BRAND_IN_USE, "Бренд используется товарами");
         brands.deleteById(name);
         brands.flush();
     }
@@ -107,7 +113,8 @@ public class ReferenceServiceImpl implements ReferenceService {
     }
 
     private void requireCategory(String code) {
-        if (!categories.existsById(code)) throw new NotFoundException("Категория не найдена");
+        if (!categories.existsById(code))
+            throw new NotFoundException(ErrorCode.CATEGORY_NOT_FOUND, "Категория не найдена");
     }
 
     private CharacteristicDto dto(Characteristic entity) {

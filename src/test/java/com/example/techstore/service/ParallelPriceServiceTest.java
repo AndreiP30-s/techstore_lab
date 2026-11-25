@@ -2,6 +2,10 @@ package com.example.techstore.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.techstore.exception.ErrorCode;
+import com.example.techstore.exception.PriceCalculationException;
+import com.example.techstore.exception.ValidationException;
+
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -35,11 +39,33 @@ class ParallelPriceServiceTest {
                 new BigDecimal("9.05"),
                 service.calculate(input, BigDecimal.TEN, 1).get(0).discountedPrice());
         assertThrows(
-                IllegalArgumentException.class, () -> service.calculate(input, BigDecimal.TEN, 0));
+                ValidationException.class, () -> service.calculate(input, BigDecimal.TEN, 0));
         assertThrows(
-                IllegalArgumentException.class, () -> service.calculate(input, BigDecimal.TEN, 33));
+                ValidationException.class, () -> service.calculate(input, BigDecimal.TEN, 33));
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> service.calculate(input, new BigDecimal("101"), 1));
+    }
+
+    @Test
+    void preservesTheFailureFromTheWorker() {
+        List<PriceSnapshot> input = List.of(new PriceSnapshot(1, "Product", null));
+        PriceCalculationException error = assertThrows(
+                PriceCalculationException.class, () -> service.calculate(input, BigDecimal.TEN, 1));
+        assertEquals(ErrorCode.PRICE_CALCULATION_FAILED, error.getCode());
+        assertInstanceOf(NullPointerException.class, error.getCause());
+    }
+
+    @Test
+    void retainsTheInterruptFlag() {
+        List<PriceSnapshot> input = List.of(new PriceSnapshot(1, "Product", BigDecimal.TEN));
+        Thread.currentThread().interrupt();
+        try {
+            assertThrows(
+                    PriceCalculationException.class, () -> service.calculate(input, BigDecimal.TEN, 1));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
     }
 }

@@ -2,7 +2,9 @@ package com.example.techstore.service.impl;
 
 import com.example.techstore.dto.UserDtos;
 import com.example.techstore.exception.ConflictException;
+import com.example.techstore.exception.ErrorCode;
 import com.example.techstore.exception.NotFoundException;
+import com.example.techstore.exception.ValidationException;
 import com.example.techstore.model.user.User;
 import com.example.techstore.model.user.UserRole;
 import com.example.techstore.repository.UserRepository;
@@ -42,9 +44,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDtos.Response create(UserDtos.Create request) {
         String email = EmailNormalizer.normalize(request.email());
-        if (users.existsById(email)) throw new ConflictException("Email уже занят");
+        if (users.existsById(email))
+            throw new ConflictException(ErrorCode.DUPLICATE_EMAIL, "Email уже занят");
         if (request.password().getBytes(StandardCharsets.UTF_8).length > 72)
-            throw new IllegalArgumentException("Пароль не больше 72 байт UTF-8");
+            throw new ValidationException(ErrorCode.PASSWORD_TOO_LONG, "Пароль не больше 72 байт UTF-8");
         User user =
                 User.create(
                         request.role(),
@@ -63,7 +66,7 @@ public class UserServiceImpl implements UserService {
         users.flush();
         if (user.getRole() != request.role()
                 && users.changeRole(user.getEmail(), request.role().name()) != 1)
-            throw new NotFoundException("Пользователь не найден");
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND, "Пользователь не найден");
         return new UserDtos.Response(user.getEmail(), user.getName(), request.role());
     }
 
@@ -76,6 +79,6 @@ public class UserServiceImpl implements UserService {
 
     private User require(String email) {
         return users.findById(EmailNormalizer.normalize(email))
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND, "Пользователь не найден"));
     }
 }

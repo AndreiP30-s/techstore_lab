@@ -3,6 +3,7 @@ package com.example.techstore.lab2;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.example.techstore.exception.ValidationException;
 import com.example.techstore.exception.ConflictException;
 import com.example.techstore.model.catalog.Brand;
 import com.example.techstore.model.catalog.Category;
@@ -78,7 +79,7 @@ class DiscountApiTest extends DatabaseFreeTest {
         product.setPrice(new BigDecimal("0.01"));
         when(products.findAll()).thenReturn(List.of(product));
         assertThrows(
-                IllegalArgumentException.class, () -> service.apply(new BigDecimal("99.99"), 2));
+                ValidationException.class, () -> service.apply(new BigDecimal("99.99"), 2));
         assertFalse(state.isActive());
         assertEquals(new BigDecimal("0.01"), product.getPrice());
         verify(backups, never()).save(any());

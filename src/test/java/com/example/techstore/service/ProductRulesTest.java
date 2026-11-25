@@ -2,6 +2,7 @@ package com.example.techstore.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.techstore.exception.ValidationException;
 import com.example.techstore.dto.ProductRequest;
 import com.example.techstore.model.product.CameraType;
 import com.example.techstore.model.product.ProductCategory;
@@ -93,7 +94,7 @@ class ProductRulesTest {
             Map<String, String> values = new HashMap<>(request.specifications());
             values.remove(field);
             assertThrows(
-                    IllegalArgumentException.class,
+                    ValidationException.class,
                     () -> rules.validate(with(request, values, request.rearCameras())),
                     field);
         }
@@ -118,7 +119,7 @@ class ProductRulesTest {
         Map<String, String> values = new HashMap<>(request.specifications());
         values.put(field, value);
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> rules.validate(with(request, values, request.rearCameras())));
     }
 
@@ -128,18 +129,18 @@ class ProductRulesTest {
         Map<String, String> values = new HashMap<>(request.specifications());
         values.put("headphoneType", "UNKNOWN");
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> rules.validate(with(request, values, List.of())));
         values.put("headphoneType", "IN_EAR");
         values.put("minFrequencyHz", "20000");
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> rules.validate(with(request, values, List.of())));
         ProductRequest laptop = valid(ProductCategory.LAPTOP);
         Map<String, String> laptopValues = new HashMap<>(laptop.specifications());
         laptopValues.put("storageType", "UNKNOWN");
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> rules.validate(with(laptop, laptopValues, List.of())));
     }
 
@@ -147,11 +148,11 @@ class ProductRulesTest {
     void rejectsMissingDuplicateExcessAndInapplicableCameras() {
         ProductRequest request = valid(ProductCategory.SMARTPHONE);
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> rules.validate(with(request, request.specifications(), List.of())));
         ProductRequest.RearCameraRequest camera = request.rearCameras().get(0);
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () ->
                         rules.validate(
                                 with(request, request.specifications(), List.of(camera, camera))));
@@ -162,11 +163,11 @@ class ProductRulesTest {
                         new ProductRequest.RearCameraRequest(
                                 CameraType.TELEPHOTO, BigDecimal.TEN, 1));
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> rules.validate(with(request, request.specifications(), excess)));
         ProductRequest laptop = valid(ProductCategory.LAPTOP);
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> rules.validate(with(laptop, laptop.specifications(), List.of(camera))));
     }
 
@@ -180,7 +181,7 @@ class ProductRulesTest {
                         new ProductRequest.RearCameraRequest(
                                 CameraType.WIDE, new BigDecimal("50"), 1));
         assertThrows(
-                IllegalArgumentException.class,
+                ValidationException.class,
                 () -> rules.validate(with(request, request.specifications(), cameras)));
     }
 }
