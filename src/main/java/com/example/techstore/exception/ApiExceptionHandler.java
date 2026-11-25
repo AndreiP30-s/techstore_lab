@@ -120,6 +120,9 @@ public class ApiExceptionHandler {
     private ResponseEntity<ErrorResponse> response(
             HttpStatus status, ErrorCode code, String message, String hint,
             List<String> details, HttpHeaders headers) {
+        if (status.is4xxClientError()) {
+            log.warn("Ошибка запроса: код={}, статус={}", code, status.value());
+        }
         return ResponseEntity.status(status).headers(headers)
                 .body(new ErrorResponse(status.value(), code.name(), message, hint, details, Instant.now()));
     }

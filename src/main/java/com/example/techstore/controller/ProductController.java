@@ -7,6 +7,7 @@ import com.example.techstore.model.product.ProductCategory;
 import com.example.techstore.service.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -40,32 +41,30 @@ public class ProductController {
     @GetMapping
     @Operation(summary = "Список товаров и фильтры")
     public PageResponse<ProductResponse> list(
-            @io.swagger.v3.oas.annotations.Parameter(
-                            description = "Часть названия; можно не заполнять")
-                    @RequestParam(required = false)
-                    String name,
-            @io.swagger.v3.oas.annotations.Parameter(
-                            description = "Точное название бренда; можно не заполнять")
-                    @RequestParam(required = false)
-                    String brand,
-            @RequestParam(required = false) ProductCategory category,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) Boolean available,
-            @io.swagger.v3.oas.annotations.Parameter(
-                            description = "Номер страницы с нуля; можно оставить 0")
-                    @RequestParam(defaultValue = "0")
-                    int page,
-            @io.swagger.v3.oas.annotations.Parameter(
-                            description = "Количество товаров на странице; можно оставить 20")
-                    @RequestParam(defaultValue = "20")
-                    int size) {
+            @Parameter(description = "Часть названия товара", example = "Смартфон")
+                    @RequestParam(required = false) String name,
+            @Parameter(description = "Точное название бренда", example = "DemoBrand")
+                    @RequestParam(required = false) String brand,
+            @Parameter(description = "Категория товара", example = "SMARTPHONE")
+                    @RequestParam(required = false) ProductCategory category,
+            @Parameter(description = "Нижняя граница цены в рублях включительно", example = "10000")
+                    @RequestParam(required = false) BigDecimal minPrice,
+            @Parameter(description = "Верхняя граница цены в рублях включительно", example = "50000")
+                    @RequestParam(required = false) BigDecimal maxPrice,
+            @Parameter(description = "Доступность для заказа. Без параметра возвращаются все товары")
+                    @RequestParam(required = false) Boolean available,
+            @Parameter(description = "Номер страницы, начиная с нуля", example = "0")
+                    @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Размер страницы от 1 до 100", example = "20")
+                    @RequestParam(defaultValue = "20") int size) {
         return service.list(name, brand, category, minPrice, maxPrice, available, page, size);
     }
 
     @GetMapping("/{article}")
     @Operation(summary = "Найти товар по артикулу")
-    public ProductResponse get(@PathVariable int article) {
+    public ProductResponse get(
+            @Parameter(description = "Артикул товара из каталога", example = "100001")
+                    @PathVariable int article) {
         return service.get(article);
     }
 
@@ -81,14 +80,20 @@ public class ProductController {
     @PutMapping("/{article}")
     @Operation(summary = "Заменить все поля и характеристики — JSON")
     public ProductResponse update(
-            @PathVariable int article, @Valid @RequestBody ProductRequest request) {
+            @Parameter(description = "Артикул товара из каталога", example = "100001")
+                    @PathVariable int article,
+            @Valid @RequestBody ProductRequest request) {
         return service.update(article, request);
     }
 
     @DeleteMapping("/{article}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Удалить товар")
-    public void delete(@PathVariable int article) {
+    @Operation(
+            summary = "Удалить товар",
+            description = "Доступно администратору. При активной скидке удаление заблокировано.")
+    public void delete(
+            @Parameter(description = "Артикул товара из каталога", example = "100001")
+                    @PathVariable int article) {
         service.delete(article);
     }
 }

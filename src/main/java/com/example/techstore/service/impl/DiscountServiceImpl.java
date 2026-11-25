@@ -15,6 +15,8 @@ import com.example.techstore.service.ParallelPriceService;
 import com.example.techstore.service.PriceQuote;
 import com.example.techstore.service.PriceSnapshot;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @Transactional
 public class DiscountServiceImpl implements DiscountService {
@@ -81,6 +84,8 @@ public class DiscountServiceImpl implements DiscountService {
         }
         state.setActive(true);
         products.flush();
+        OperationAudit.info(log, "Скидка применена: процент={}, потоков={}, товаров={}",
+                percent, threads, entities.size());
         return new Result(entities.size());
     }
 
@@ -99,6 +104,7 @@ public class DiscountServiceImpl implements DiscountService {
         backups.deleteAllInBatch();
         state.setActive(false);
         products.flush();
+        OperationAudit.info(log, "Скидка отменена: восстановлено цен={}", prices.size());
         return new Result(prices.size());
     }
 

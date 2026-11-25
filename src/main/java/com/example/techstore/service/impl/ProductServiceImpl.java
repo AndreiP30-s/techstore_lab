@@ -23,6 +23,8 @@ import com.example.techstore.repository.ProductRepository;
 import com.example.techstore.service.CharacteristicValidator;
 import com.example.techstore.service.ProductService;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
@@ -95,7 +98,10 @@ public class ProductServiceImpl implements ProductService {
         products.saveAndFlush(product);
         addChildren(product, request);
         products.flush();
-        return ProductResponse.from(product);
+        ProductResponse response = ProductResponse.from(product);
+        OperationAudit.info(log, "Создан товар: артикул={}, название={}",
+                response.article(), response.name());
+        return response;
     }
 
     @Transactional
@@ -127,7 +133,9 @@ public class ProductServiceImpl implements ProductService {
         if (request.price() != null) product.setPrice(request.price());
         if (request.available() != null) product.setAvailable(request.available());
         products.flush();
-        return ProductResponse.from(product);
+        ProductResponse response = ProductResponse.from(product);
+        OperationAudit.info(log, "Обновлён товар: артикул={}", article);
+        return response;
     }
 
     @Transactional
@@ -142,7 +150,9 @@ public class ProductServiceImpl implements ProductService {
         products.flush();
         addChildren(product, request);
         products.flush();
-        return ProductResponse.from(product);
+        ProductResponse response = ProductResponse.from(product);
+        OperationAudit.info(log, "Обновлён товар: артикул={}", article);
+        return response;
     }
 
     @Transactional
@@ -151,6 +161,7 @@ public class ProductServiceImpl implements ProductService {
         lockDiscounts();
         products.delete(require(article));
         products.flush();
+        OperationAudit.info(log, "Удалён товар: артикул={}", article);
     }
 
     private void lockDiscounts() {

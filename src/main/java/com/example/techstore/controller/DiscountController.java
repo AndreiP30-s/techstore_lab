@@ -39,8 +39,10 @@ public class DiscountController {
                     {"percent":10,"threads":3}
                     """)
     public record Request(
-            @NotNull @DecimalMin("0.01") @DecimalMax("99.99") BigDecimal percent,
-            @Min(1) @Max(32) int threads) {}
+            @Schema(description = "Размер скидки в процентах", example = "10")
+                    @NotNull @DecimalMin("0.01") @DecimalMax("99.99") BigDecimal percent,
+            @Schema(description = "Число потоков расчёта от 1 до 32", example = "3")
+                    @Min(1) @Max(32) int threads) {}
 
     @GetMapping
     @Operation(summary = "Состояние скидки")

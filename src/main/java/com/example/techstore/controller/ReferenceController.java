@@ -6,6 +6,7 @@ import com.example.techstore.dto.ReferenceDtos.CharacteristicDto;
 import com.example.techstore.service.ReferenceService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -41,7 +42,9 @@ public class ReferenceController {
 
     @GetMapping("/brands/{name}")
     @Operation(summary = "Найти бренд по имени")
-    public BrandDto brand(@PathVariable String name) {
+    public BrandDto brand(
+            @Parameter(description = "Точное название бренда", example = "DemoBrand")
+                    @PathVariable String name) {
         return service.brand(name);
     }
 
@@ -54,14 +57,19 @@ public class ReferenceController {
 
     @PutMapping("/brands/{name}")
     @Operation(summary = "Переименовать неиспользуемый бренд")
-    public BrandDto renameBrand(@PathVariable String name, @Valid @RequestBody BrandDto request) {
+    public BrandDto renameBrand(
+            @Parameter(description = "Текущее название бренда", example = "DemoBrand")
+                    @PathVariable String name,
+            @Valid @RequestBody BrandDto request) {
         return service.renameBrand(name, request);
     }
 
     @DeleteMapping("/brands/{name}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Удалить неиспользуемый бренд")
-    public void deleteBrand(@PathVariable String name) {
+    public void deleteBrand(
+            @Parameter(description = "Точное название бренда", example = "DemoBrand")
+                    @PathVariable String name) {
         service.deleteBrand(name);
     }
 
@@ -79,7 +87,9 @@ public class ReferenceController {
 
     @GetMapping("/categories/{code}/specifications")
     @Operation(summary = "Характеристики категории")
-    public List<String> categorySpecifications(@PathVariable String code) {
+    public List<String> categorySpecifications(
+            @Parameter(description = "Код категории из справочника", example = "SMARTPHONE")
+                    @PathVariable String code) {
         return service.categorySpecifications(code);
     }
 }

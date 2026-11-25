@@ -4,6 +4,7 @@ import com.example.techstore.dto.*;
 import com.example.techstore.service.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
@@ -113,8 +114,9 @@ public class ProductFormController {
                     "Введите артикул и только те поля, которые хотите изменить. Пустые поля"
                             + " оставляют прежние значения. Характеристики и камеры сохраняются.")
     public ProductResponse details(
-            @PathVariable int article,
-            @io.swagger.v3.oas.annotations.Parameter(hidden = true) @Valid @ModelAttribute
+            @Parameter(description = "Артикул товара из каталога", example = "100001")
+                    @PathVariable int article,
+            @Parameter(hidden = true) @Valid @ModelAttribute
                     ProductForms.Details form) {
         return service.updateDetails(article, form);
     }
